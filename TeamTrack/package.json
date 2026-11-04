@@ -1,0 +1,8 @@
+{
+  "name": "pulse-server",
+  "version": "1.0.0",
+  "description": "Back end for Pulse, the AI-Powered Project Health Monitor",
+  "main": "server.js",
+  "scripts": { "start": "node server.js" },
+  "dependencies": { "express": "^4.21.2" }
+}

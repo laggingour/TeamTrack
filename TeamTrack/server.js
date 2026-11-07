@@ -10,7 +10,13 @@ const { findUserByEmail, createUser } = require("./users");
 const { verifyPassword } = require("./auth");
 const { generateToken, verifyToken } = require("./jwt");
 const { calc, buildAlerts } = require("./scoring");
-
+const { startAsanaScheduler } = require("./integrations/asana-scheduler");
+const { createAsanaRouter } = require("./integrations/asana-routes");
+const {
+  saveOAuthState,
+  consumeOAuthState
+} = require("./integrations/asana-oauth-store");
+const { saveConnection } = require("./integrations/asana-connection-store");
 const app = express();
 
 app.use(express.json());
@@ -464,7 +470,7 @@ async function requireAuth(req, res, next) {
       });
     }
 
-    req.user = user;
+    req.user = { ...user, id: user.user_id };
     next();
 
   } catch (error) {
@@ -581,11 +587,23 @@ app.put("/api/settings", requireAuth, (req, res) => {
 // --------------------------------------------------
 // FRONTEND WEBSITE
 // --------------------------------------------------
-
+// ASANA OAUTH ROUTES
+app.use(
+  "/api/asana",
+  createAsanaRouter({
+    requireAuth,
+    saveOAuthState,
+    consumeOAuthState,
+    saveConnection
+  })
+);
 app.use(express.static(path.join(__dirname, "public")));
 
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
   console.log(`Pulse running at http://localhost:${PORT}`);
+
+  startAsanaScheduler();
+  console.log("Asana automatic sync scheduled every 5 minutes.");
 });

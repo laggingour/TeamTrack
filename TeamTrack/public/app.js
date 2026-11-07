@@ -1164,17 +1164,19 @@ function settings() {
       <section class="card">
 
         <h2>Asana connection</h2>
-
         <p>
-          Connected workspace:
-          <strong>Agency Delivery</strong>
-          · ${pl(P.length, "project")} monitored
-          · syncing every 15 minutes
-        </p>
+       Connect your Asana account to import projects
+       and tasks into Pulse.
+       </p>
 
-        <button type="button" class="btn alt" id="rc">
-          Reconnect Asana
-        </button>
+     <p>
+      Automatic synchronisation runs every 5 minutes.
+      </p>
+
+      <button type="button" class="btn alt" id="rc">
+      Connect Asana
+     </button>
+
 
       </section>
 
@@ -1185,8 +1187,19 @@ function settings() {
     </form>
   `, "s");
 
-  $("#rc").onclick = () =>
-    toast("Asana authorisation would open here (OAuth 2.0)");
+    $("#rc").onclick = async () => {
+    try {
+    const result = await api("/api/asana/connect");
+
+    if (!result.authorizationUrl) {
+      throw new Error("Asana authorization URL was not returned");
+    }
+
+    window.location.assign(result.authorizationUrl);
+  } catch (error) {
+    toast(error.message || "Unable to connect Asana");
+  }
+};
 
   $("#sf").onsubmit = async (event) => {
     event.preventDefault();

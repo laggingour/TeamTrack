@@ -44,7 +44,9 @@ function createAsanaRouter({
       // and associated with the Pulse user.
       await saveOAuthState(req.user.id, state);
 
-      return res.redirect(getAuthorizationUrl(state));
+      return res.json({
+      authorizationUrl: getAuthorizationUrl(state)
+      });
     } catch (error) {
       console.error("Asana connection failed:", error.message);
 

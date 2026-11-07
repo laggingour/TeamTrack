@@ -7,11 +7,13 @@ const ASANA_AUTHORIZE_URL =
 const ASANA_TOKEN_URL =
   "https://app.asana.com/-/oauth_token";
 
+// Permissions required for Pulse Asana integration
 const SCOPES = [
-  "default",
+  "workspaces:read",
   "projects:read",
   "tasks:read",
-  "stories:read"
+  "stories:read",
+  "users:read"
 ];
 
 function getConfig() {
@@ -36,10 +38,12 @@ function getConfig() {
   };
 }
 
+// Generate secure OAuth state
 function createOAuthState() {
   return crypto.randomBytes(32).toString("hex");
 }
 
+// Generate Asana authorization URL
 function getAuthorizationUrl(state) {
   if (!state) {
     throw new Error("OAuth state is required");
@@ -48,15 +52,36 @@ function getAuthorizationUrl(state) {
   const config = getConfig();
 
   const url = new URL(ASANA_AUTHORIZE_URL);
-  url.searchParams.set("client_id", config.clientId);
-  url.searchParams.set("redirect_uri", config.redirectUri);
-  url.searchParams.set("response_type", "code");
-  url.searchParams.set("state", state);
-  url.searchParams.set("scope", SCOPES.join(" "));
+
+  url.searchParams.set(
+    "client_id",
+    config.clientId
+  );
+
+  url.searchParams.set(
+    "redirect_uri",
+    config.redirectUri
+  );
+
+  url.searchParams.set(
+    "response_type",
+    "code"
+  );
+
+  url.searchParams.set(
+    "state",
+    state
+  );
+
+  url.searchParams.set(
+    "scope",
+    SCOPES.join(" ")
+  );
 
   return url.toString();
 }
 
+// Request access or refresh tokens
 async function requestToken(parameters) {
   const config = getConfig();
 
@@ -66,13 +91,17 @@ async function requestToken(parameters) {
     ...parameters
   });
 
-  const response = await fetch(ASANA_TOKEN_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded"
-    },
-    body
-  });
+  const response = await fetch(
+    ASANA_TOKEN_URL,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type":
+          "application/x-www-form-urlencoded"
+      },
+      body
+    }
+  );
 
   if (!response.ok) {
     throw new Error(
@@ -83,9 +112,12 @@ async function requestToken(parameters) {
   return response.json();
 }
 
+// Exchange authorization code for tokens
 async function exchangeAuthorizationCode(code) {
   if (!code) {
-    throw new Error("Authorization code is required");
+    throw new Error(
+      "Authorization code is required"
+    );
   }
 
   const config = getConfig();
@@ -97,9 +129,12 @@ async function exchangeAuthorizationCode(code) {
   });
 }
 
+// Refresh expired Asana access token
 async function refreshAccessToken(refreshToken) {
   if (!refreshToken) {
-    throw new Error("Refresh token is required");
+    throw new Error(
+      "Refresh token is required"
+    );
   }
 
   return requestToken({

@@ -25,7 +25,6 @@ async function asanaRequest(accessToken, endpoint, params = {}) {
   if (!response.ok) {
     const details = await response.text();
 
-    // Avoid printing potentially sensitive API response data
     console.error("Asana API request failed:", {
       status: response.status,
       endpoint
@@ -62,19 +61,20 @@ async function getAllPages(accessToken, endpoint, params = {}) {
 
     results.push(...response.data);
     offset = response.next_page?.offset;
+
   } while (offset);
 
   return results;
 }
 
-// Get workspaces accessible to the user
+// Get workspaces accessible to the connected user
 async function getWorkspaces(accessToken) {
   return getAllPages(accessToken, "/workspaces", {
     opt_fields: "gid,name"
   });
 }
 
-// Get projects from all accessible workspaces
+// Get projects from accessible workspaces
 async function getProjects(accessToken) {
   const workspaces = await getWorkspaces(accessToken);
   const projects = [];
@@ -96,6 +96,7 @@ async function getProjects(accessToken) {
 }
 
 // Get tasks belonging to a specific project
+// User-related fields removed to reduce scope requirements
 async function getProjectTasks(accessToken, projectGid) {
   if (!projectGid) {
     throw new Error("Project GID is required");
@@ -114,15 +115,14 @@ async function getProjectTasks(accessToken, projectGid) {
         "due_on",
         "due_at",
         "created_at",
-        "modified_at",
-        "assignee.gid",
-        "assignee.name"
+        "modified_at"
       ].join(",")
     }
   );
 }
 
 // Get activity and comments for a task
+// User-related fields removed to reduce scope requirements
 async function getTaskStories(accessToken, taskGid) {
   if (!taskGid) {
     throw new Error("Task GID is required");
@@ -136,15 +136,13 @@ async function getTaskStories(accessToken, taskGid) {
         "gid",
         "text",
         "type",
-        "created_at",
-        "created_by.gid",
-        "created_by.name"
+        "created_at"
       ].join(",")
     }
   );
 }
 
-// Export functions for use in server.js and test files
+// Export functions for use in sync.js and test files
 module.exports = {
   asanaRequest,
   getAllPages,

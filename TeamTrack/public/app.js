@@ -1043,19 +1043,29 @@ function alertsPage() {
     };
   });
 
-  $("#ma").onclick = () => {
-    allAlerts.forEach((alert) => S.read.add(alert.id));
+    $("#ma").onclick = () => {
+     allAlerts.forEach((alert) => S.read.add(alert.id));
 
-    alertsPage();
-    toast("All alerts marked as read");
-  };
+     localStorage.setItem(
+    "pulseReadAlerts",
+    JSON.stringify([...S.read])
+     );
+
+  alertsPage();
+  toast("All alerts marked as read");
+    };
 
   document.querySelectorAll(".al").forEach((element) => {
     const go = () => {
-      S.read.add(element.dataset.id);
-      location.hash = "project-" + element.dataset.p;
-    };
+  S.read.add(element.dataset.id);
 
+  localStorage.setItem(
+    "pulseReadAlerts",
+    JSON.stringify([...S.read])
+  );
+
+  location.hash = "project-" + element.dataset.p;
+};
     element.onclick = go;
 
     element.onkeydown = (event) => {
@@ -1327,5 +1337,39 @@ async function startApp() {
     route();
   }
 }
+// Restore alerts marked as read after refreshing
+try {
+  S.read = new Set(
+    JSON.parse(localStorage.getItem("pulseReadAlerts") || "[]")
+  );
+} catch (error) {
+  S.read = new Set();
+}
+// Restore alerts marked as read after refreshing
+try {
+  S.read = new Set(
+    JSON.parse(localStorage.getItem("pulseReadAlerts") || "[]")
+  );
+} catch (error) {
+  S.read = new Set();
+}
+// Restore alerts marked as read after refreshing
+try {
+  S.read = new Set(
+    JSON.parse(localStorage.getItem("pulseReadAlerts") || "[]")
+    );
+    } catch (error) {
+  S.read = new Set();
+}
+// Restore alerts marked as read after refreshing
+try {
+     S.read = new Set(
+    JSON.parse(localStorage.getItem("pulseReadAlerts") || "[]")
+     );
+      } catch (error) {
+      S.read = new Set();
+         }
 
 startApp();
+
+
